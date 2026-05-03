@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>校园组队平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>{GLOBAL_JS.replace('{myPhone}', my_phone)}</script>
+    <script>
+        window.onload = () => {{ 
+            renderMarkdown(); 
+            if ({user['is_first_login']} === 1) document.getElementById('profile-modal').classList.remove('hidden'); 
+        }};
+        function toggleEye(inputId, iconId) {{
+            let p = document.getElementById(inputId); let i = document.getElementById(iconId);
+            if(p.type==='password'){{ p.type='text'; i.innerHTML='🙈'; }} else {{ p.type='password'; i.innerHTML='👁️'; }}
+        }}
+    </script>
+    </head>
+    <body class="bg-slate-50 p-4 md:p-8 font-sans">
+        <div id="toast-container" class="fixed bottom-5 right-5 z-50 w-80 flex flex-col justify-end pointer-events-none"></div>
+
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 transition-opacity"></div>
+        <div id="sidebar" class="fixed inset-y-0 right-0 w-64 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col">
+            <div class="p-6 bg-indigo-600 flex flex-col items-center justify-center text-white relative">
+                <button onclick="toggleSidebar()" class="absolute top-2 left-3 text-white hover:text-gray-200 text-2xl font-bold">&times;</button>
+                <div class="w-16 h-16 bg-white text-indigo-600 rounded-full flex items-center justify-center font-black text-3xl mb-3 shadow-lg">{html.escape(my_name)[0]}</div>
+                <span class="font-bold text-lg truncate w-full text-center">{html.escape(my_name)}</span>
+                <span class="text-xs text-indigo-200 mt-1">{html.escape(student_id_val)}</span>
+            </div>
+            <div class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <button onclick="toggleSidebar(); document.getElementById('profile-modal').classList.remove('hidden')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 font-bold transition-colors flex items-center gap-3">👤 个人信息</button>
+                <button onclick="toggleSidebar(); document.getElementById('pwd-modal').classList.remove('hidden')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 font-bold transition-colors flex items-center gap-3">🔒 修改密码</button>
+            </div>
+            <div class="p-4 border-t border-gray-100">
+                <a href="/logout" class="block w-full text-center px-4 py-3 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white rounded-xl font-bold transition-colors shadow-sm">🚪 退出登录</a>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto space-y-6">
+            <header class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
+
+                <div class="flex items-center gap-4 ml-4">
+                    <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hidden md:block">🚀 校园组队平台</h1>
+                </div>
+
+                <div class="flex items-center gap-2 bg-gray-50 p-2 pr-2 rounded-xl border border-gray-200 ml-auto flex-wrap justify-end">
+                    <button onclick="document.getElementById('create-modal').classList.remove('hidden')" class="text-sm font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors">➕ 发布招募</button>
+                    <button onclick="openModalAndMarkRead('audit-modal', 'audit')" class="relative text-sm font-bold bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                        🛡️ 队长审批<span id="audit-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full {'hidden' if panels['audit_count'] == 0 else ''}">{panels['audit_count']}</span>
+                    </button>
+                    <button onclick="openModalAndMarkRead('apply-modal', 'apply')" class="relative text-sm font-bold bg-green-50 text-green-600 hover:bg-green-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                        🙋‍♂️ 我的申请<span id="apply-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full {'hidden' if panels['apply_count'] == 0 else ''}">{panels['apply_count']}</span>
+                    </button>
+                    <button onclick="document.getElementById('my-projects-modal').classList.remove('hidden')" class="text-sm font-bold bg-purple-50 text-purple-600 hover:bg-purple-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors">📝 我的招募</button>
+
+                    <a href="/chat" class="relative text-sm font-bold bg-gray-100 text-gray-600 hover:bg-gray-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                        💬 消息<span id="msg-badge" class="absolute -top-1 -right-1 flex h-3 w-3 hidden"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 border border-white"></span></span>
+                    </a>
+
+                    <div class="w-px h-5 bg-gray-300 mx-2"></div>
+
+                    <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:ring-4 ring-indigo-200 shadow-sm transition-all" onclick="toggleSidebar()">{html.escape(my_name)[0]}</div>
+                </div>
+            </header>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm flex gap-4 border border-gray-100">
+                <input type="text" id="search-q" placeholder="🔍 搜索项目名称或详情..." class="border p-2 rounded flex-1 text-sm outline-none focus:ring-2 focus:ring-indigo-300">
+                <input type="text" id="search-tag" placeholder="🏷️ 标签筛选 (如: Python)" class="border p-2 rounded w-1/4 text-sm outline-none focus:ring-2 focus:ring-indigo-300">
+                <button onclick="refreshDashboard()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white px-6 py-2 rounded-lg font-bold transition-colors shadow-sm">快速搜索</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                <div class="md:col-span-8">
+                    <h2 class="text-xl font-bold mb-4 border-l-4 border-indigo-500 pl-3">公共招募大厅</h2>
+                    <div id="projects-container">{panels['projects']}</div>
+                </div>
+                <div class="md:col-span-4 space-y-4 sticky top-6">
+                    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-2xl shadow-sm border border-yellow-200">
+                        <h2 class="font-bold mb-4 border-b border-yellow-300 pb-2 text-yellow-800">💡 猜你喜欢 (智能推荐)</h2>
+                        <div id="recommend-container" class="space-y-2">{panels['recommend']}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="create-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg relative">
+                <button onclick="document.getElementById('create-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors font-bold text-2xl z-10">&times;</button>
+                <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">➕ 发布新队伍招募</h2>
+                <form action="/create" method="post" class="space-y-3 m-0 ajax-form">
+                    <input type="text" name="title" required placeholder="项目名称" class="w-full p-2.5 bg-gray-50 border rounded text-sm outline-none focus:ring-2 focus:ring-indigo-300">
+                    <div class="flex gap-3">
+                        <input type="number" name="base_members" required placeholder="已有人数" min="1" class="w-1/2 p-2.5 bg-gray-50 border rounded text-sm outline-none focus:ring-2 focus:ring-indigo-300">
+                        <input type="number" name="required_members" required placeholder="共需人数" min="2" class="w-1/2 p-2.5 bg-gray-50 border rounded text-sm outline-none focus:ring-2 focus:ring-indigo-300">
+                    </div>
+                    <input type="text" name="tags" placeholder="技术标签 (逗号分隔)" class="w-full p-2.5 bg-gray-50 border rounded text-sm outline-none focus:ring-2 focus:ring-indigo-300">
+                    <textarea name="description" required placeholder="支持 Markdown 语法排版..." class="w-full p-2.5 bg-gray-50 border rounded text-sm h-32 outline-none resize-none focus:ring-2 focus:ring-indigo-300"></textarea>
+                    <button type="submit" class="w-full bg-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-colors py-2.5 rounded-lg font-bold mt-2">立即发布</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="audit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-xl max-h-[80vh] flex flex-col relative">
+                <button onclick="document.getElementById('audit-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors font-bold text-2xl z-10">&times;</button>
+                <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">🛡️ 队长审批与记录</h2>
+                <ul id="audits-container" class="flex-1 overflow-y-auto m-0 p-0 pr-2 space-y-3">{panels['audits']}</ul>
+            </div>
+        </div>
+
+        <div id="apply-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-xl max-h-[80vh] flex flex-col relative">
+                <button onclick="document.getElementById('apply-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors font-bold text-2xl z-10">&times;</button>
+                <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">🙋‍♂️ 我的申请记录</h2>
+                <ul id="apply-container" class="flex-1 overflow-y-auto m-0 p-0 pr-2 space-y-3">{panels['my_apps']}</ul>
+            </div>
+        </div>
+
+        <div id="my-projects-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col relative">
+                <button onclick="document.getElementById('my-projects-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors font-bold text-2xl z-10">&times;</button>
+                <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">📝 我的招募管理</h2>
+                <ul id="my-projects-container" class="flex-1 overflow-y-auto m-0 p-0 pr-2 space-y-3">{panels['my_projects']}</ul>
+            </div>
+        </div>
+
+        <div id="profile-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg relative">
+                <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors font-bold text-2xl z-10">&times;</button>
+                <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">👤 完善个人资料与标签</h2>
+                <form action="/update_profile" method="post" class="space-y-4 ajax-form">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold text-gray-500 mb-1">真实姓名/昵称</label><input type="text" name="name" value="{html.escape(my_name)}" required class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+                        <div><label class="block text-xs font-bold text-gray-500 mb-1">学院</label><input type="text" name="college" value="{html.escape(college)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold text-gray-500 mb-1">专业</label><input type="text" name="major" value="{html.escape(major)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+                        <div><label class="block text-xs font-bold text-gray-500 mb-1">班级</label><input type="text" name="class_name" value="{html.escape(class_name)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold text-indigo-500 mb-1">技能/兴趣标签 (逗号分隔)</label><input type="text" name="skills" value="{html.escape(skills)}" placeholder="例如: Python, 写作" class="w-full border border-indigo-300 bg-indigo-50 p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-500"></div>
+                        <div><label class="block text-xs font-bold text-gray-500 mb-1">QQ号</label><input type="text" name="qq" value="{html.escape(qq)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold text-gray-500 mb-1">微信号</label><input type="text" name="wechat" value="{html.escape(wechat)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+                        <div><label class="block text-xs font-bold text-orange-500 mb-1">个人荣誉 (选填)</label><input type="text" name="honors" value="{html.escape(honors)}" placeholder="如: 国家奖学金" class="w-full border border-orange-300 bg-orange-50 p-2 rounded outline-none text-sm focus:ring-2 focus:ring-orange-400"></div>
+                    </div>
+                    <div><label class="block text-xs font-bold text-gray-500 mb-1">个性签名</label><textarea name="bio" class="w-full border p-2 rounded outline-none h-12 resize-none text-sm focus:ring-2 focus:ring-indigo-300">{html.escape(bio)}</textarea></div>
+
+                    <div class="flex justify-end gap-3 mt-4 pt-4 border-t">
+                        <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden')" class="px-5 py-2 bg-gray-100 hover:bg-gray-300 text-gray-600 transition-colors rounded-lg font-bold">稍后再说</button>
+                        <button type="submit" class="px-5 py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-colors rounded-lg font-bold shadow-sm">保存并关闭</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="pwd-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm relative">
+                <button onclick="closePwdModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors font-bold text-2xl z-10">&times;</button>
+                <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">🔒 修改密码</h2>
+                <form id="pwd-form" action="/change_password" method="post" class="space-y-4 ajax-form">
+                    <input type="text" name="student_id" placeholder="当前账号验证: 学号" required class="w-full border p-2.5 rounded-lg outline-none text-sm focus:ring-2 focus:ring-indigo-300">
+                    <input type="tel" name="phone" placeholder="当前账号验证: 手机号" required class="w-full border p-2.5 rounded-lg outline-none text-sm focus:ring-2 focus:ring-indigo-300">
+
+                    <div class="relative">
+                        <input type="password" id="cp0" name="old_password" placeholder="原密码" required class="w-full border p-2.5 rounded-lg outline-none text-sm pr-10 focus:ring-2 focus:ring-indigo-300">
+                        <span id="ce0" onclick="toggleEye('cp0','ce0')" class="absolute right-3 top-2.5 cursor-pointer opacity-60 hover:opacity-100 transition text-lg">👁️</span>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="cp1" name="new_password" placeholder="新密码" required class="w-full border p-2.5 rounded-lg outline-none text-sm pr-10 focus:ring-2 focus:ring-indigo-300">
+                        <span id="ce1" onclick="toggleEye('cp1','ce1')" class="absolute right-3 top-2.5 cursor-pointer opacity-60 hover:opacity-100 transition text-lg">👁️</span>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="cp2" name="confirm_new_password" placeholder="再次确认新密码" required class="w-full border p-2.5 rounded-lg outline-none text-sm pr-10 focus:ring-2 focus:ring-indigo-300">
+                        <span id="ce2" onclick="toggleEye('cp2','ce2')" class="absolute right-3 top-2.5 cursor-pointer opacity-60 hover:opacity-100 transition text-lg">👁️</span>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white transition-colors py-2.5 rounded-lg font-bold mt-2 shadow-sm">确认修改</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-profile-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center relative overflow-hidden"><button onclick="document.getElementById('view-profile-modal').classList.add('hidden')" class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 transition-colors font-bold text-2xl z-10">&times;</button><div class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mx-auto shadow-lg mb-4 mt-4 text-white text-4xl font-black cursor-pointer hover:ring-4 ring-indigo-200 transition-all" id="view-avatar">?</div><h2 class="text-2xl font-black text-gray-800 mb-1" id="view-name">加载中...</h2><p class="text-sm text-gray-500 font-bold mb-2" id="view-edu"></p><p class="text-xs text-blue-600 bg-blue-50 inline-block px-3 py-1 rounded-full mb-2 font-bold" id="view-skills"></p><br><p class="text-xs text-orange-600 bg-orange-50 inline-block px-3 py-1 rounded-full mb-6 font-bold" id="view-honors"></p><button id="btn-start-chat" class="w-full bg-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-colors font-bold py-3 rounded-xl shadow-md mb-2">💬 发起聊天</button></div>
+        </div>
+    </body></html>
