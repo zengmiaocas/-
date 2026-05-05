@@ -12,7 +12,7 @@ Design_Web用于存储前端的页面设计
 
 --数据库--
 
-sql.SQL用于存储SQL语句
+SQL.sql用于存储SQL语句
 
 E-R_diagram用于存储数据库的E-R图
 
