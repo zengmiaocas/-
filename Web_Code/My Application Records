@@ -1,0 +1,7 @@
+<div id="apply-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-xl max-h-[80vh] flex flex-col relative">
+        <button onclick="document.getElementById('apply-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors font-bold text-2xl z-10">&times;</button>
+        <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">🙋‍♂️ 我的申请记录</h2>
+        <ul id="apply-container" class="flex-1 overflow-y-auto m-0 p-0 pr-2 space-y-3">{panels['my_apps']}</ul>
+    </div>
+</div>
