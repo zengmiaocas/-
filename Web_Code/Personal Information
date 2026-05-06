@@ -1,0 +1,30 @@
+<div id="profile-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg relative">
+        <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors font-bold text-2xl z-10">&times;</button>
+        <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">👤 完善个人资料与标签</h2>
+        <form action="/update_profile" method="post" class="space-y-4 ajax-form">
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">真实姓名/昵称</label><input type="text" name="name" value="{html.escape(my_name)}" required class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">学院</label><input type="text" name="college" value="{html.escape(college)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">专业</label><input type="text" name="major" value="{html.escape(major)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">班级</label><input type="text" name="class_name" value="{html.escape(class_name)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-xs font-bold text-indigo-500 mb-1">技能/兴趣标签 (逗号分隔)</label><input type="text" name="skills" value="{html.escape(skills)}" placeholder="例如: Python, 写作" class="w-full border border-indigo-300 bg-indigo-50 p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-500"></div>
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">QQ号</label><input type="text" name="qq" value="{html.escape(qq)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">微信号</label><input type="text" name="wechat" value="{html.escape(wechat)}" class="w-full border p-2 rounded outline-none text-sm focus:ring-2 focus:ring-indigo-300"></div>
+                <div><label class="block text-xs font-bold text-orange-500 mb-1">个人荣誉 (选填)</label><input type="text" name="honors" value="{html.escape(honors)}" placeholder="如: 国家奖学金" class="w-full border border-orange-300 bg-orange-50 p-2 rounded outline-none text-sm focus:ring-2 focus:ring-orange-400"></div>
+            </div>
+            <div><label class="block text-xs font-bold text-gray-500 mb-1">个性签名</label><textarea name="bio" class="w-full border p-2 rounded outline-none h-12 resize-none text-sm focus:ring-2 focus:ring-indigo-300">{html.escape(bio)}</textarea></div>
+
+            <div class="flex justify-end gap-3 mt-4 pt-4 border-t">
+                <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden')" class="px-5 py-2 bg-gray-100 hover:bg-gray-300 text-gray-600 transition-colors rounded-lg font-bold">稍后再说</button>
+                <button type="submit" class="px-5 py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-colors rounded-lg font-bold shadow-sm">保存并关闭</button>
+            </div>
+        </form>
+    </div>
+</div>
